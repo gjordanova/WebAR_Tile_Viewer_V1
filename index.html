@@ -1,28 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mk">
 <head>
   <meta charset="UTF-8">
-  <title>30x30 Tile in AR</title>
+  <title>30x30 Tile in AR – Floor & Wall</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
-    body { text-align: center; font-family: sans-serif; margin-top: 50px; }
-    button {
-      font-size: 18px;
-      padding: 12px 24px;
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      margin-top: 50px;
+    }
+    /* Основен стил за модел-приказот */
+    model-viewer {
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      border: 1px solid #ccc;
+      margin: 0 auto;
+      display: block;
+    }
+    /* Стил за копчињата */
+    .button-row {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .button-row button {
+      font-size: 16px;
+      padding: 10px 20px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       background-color: #333;
       color: white;
       cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .button-row button:hover {
+      background-color: #555;
+    }
+    .button-row button.active {
+      background-color: #4caf50; /* зелена кога е активна опцијата */
     }
   </style>
 </head>
 <body>
 <h1>View 30x30 Tile in AR</h1>
 
+<!-- 1. Модел-преглед со подготвени AR-атрибути -->
 <model-viewer
-        src="tile3.glb"
-        ios-src="pattern.usdz"
+        id="viewer"
+        src="models/tile3.glb"
+        ios-src="models/pattern.usdz"
         alt="Просторија со плочки на подот и ѕидовите"
         camera-controls
         auto-rotate
@@ -30,43 +60,68 @@
         camera-orbit="45deg 75deg 2.5m"
         camera-target="0m 0m 0m"
         field-of-view="50deg"
-        environment-image="hdri_sky_015.hdr"
+        environment-image="textures/hdri_sky_015.hdr"
+        poster="textures/tile2.jpg"
         ar
         ar-modes="webxr scene-viewer quick-look"
         ar-placement="floor"
-        ar-placement="wall"
-        ar-scale="auto"
-        style="width: 100%; height: 600px; border: 1px solid #ccc;">
+        ar-scale="auto">
 </model-viewer>
 
+<!-- 2. Ред со копчиња за под/ѕид и View in AR -->
+<div class="button-row">
+  <button id="toFloor" class="active">Постави на под</button>
+  <button id="toWall">Постави на ѕид</button>
+  <button id="ar-button">📱 View in AR</button>
+</div>
 
-
-
-<button id="ar-button">📱 View in AR</button>
-
+<!-- 3. JavaScript за динамичко менување на ar-placement и активирање на AR -->
 <script>
   const viewer = document.getElementById('viewer');
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const btnFloor = document.getElementById('toFloor');
+  const btnWall = document.getElementById('toWall');
+  const btnAR = document.getElementById('ar-button');
 
+  // Детектирање на платформа (Android / iOS)
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
   const isAndroid = /android/i.test(userAgent);
   const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
 
-  // ✅ Dynamically load correct model for platform
+  // Динамички постави src/ios-src според платформа
   if (isIOS) {
-    viewer.setAttribute("ios-src", "pattern.usdz");
-    viewer.setAttribute("src", "tile3.glb"); // fallback
+    // iOS: користи USDZ за Quick Look, а GLB како резервен
+    viewer.setAttribute("ios-src", "models/pattern.usdz");
+    viewer.setAttribute("src", "models/tile3.glb");
   } else if (isAndroid) {
-    viewer.setAttribute("src", "tile3.glb");
+    // Android: користи GLB
+    viewer.setAttribute("src", "models/tile3.glb");
   }
 
-  // ✅ Ensure AR is triggered on click
-  document.getElementById('ar-button').onclick = () => {
+  // Всушност, почетно ar-placement="floor" веќе е зададен во HTML
+  btnFloor.classList.add('active');
+
+  // Клик на копчето "Постави на под"
+  btnFloor.addEventListener('click', () => {
+    viewer.setAttribute('ar-placement', 'floor');
+    btnFloor.classList.add('active');
+    btnWall.classList.remove('active');
+  });
+
+  // Клик на копчето "Постави на ѕид"
+  btnWall.addEventListener('click', () => {
+    viewer.setAttribute('ar-placement', 'wall');
+    btnWall.classList.add('active');
+    btnFloor.classList.remove('active');
+  });
+
+  // Клик на копчето "View in AR"
+  btnAR.addEventListener('click', () => {
     if (viewer && typeof viewer.activateAR === 'function') {
       viewer.activateAR();
     } else {
       alert("AR not supported or model not loaded.");
     }
-  };
+  });
 </script>
 </body>
 </html>
