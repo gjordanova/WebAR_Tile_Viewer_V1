@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, user-scalable=no"
+  />
+  <title>Tile Painter AR</title>
+
+  <!-- Fullscreen & button styling -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Model Viewer (for iOS fallback) from Google CDN -->
+  <script
+          type="module"
+          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+  ></script>
+
+  <!-- Your app’s entry point: detects platform & boots AR -->
+  <script type="module" src="js/main.js"></script>
+</head>
+
+<body>
+<!--
+  ENTER AR BUTTON
+  Visible only on mobile. Hidden on desktop.
+  Tapping this invokes either WebXR (Android) or Quick Look (iOS).
+-->
+<button id="enter-ar-btn">Enter AR</button>
+
+<!--
+  The AR content (Three.js canvas or <model-viewer>) will be injected
+  by js/main.js → either initAndroidAR() or initIosFallback().
+-->
+</body>
+</html>
