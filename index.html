@@ -21,6 +21,8 @@
 <h1>View 30x30 Tile in AR</h1>
 
 <model-viewer
+        src="tile3.glb"
+        ios-src="pattern.usdz"
         alt="Просторија со плочки на подот и ѕидовите"
         camera-controls
         auto-rotate
@@ -28,6 +30,8 @@
         camera-orbit="45deg 75deg 2.5m"
         camera-target="0m 0m 0m"
         field-of-view="50deg"
+        environment-image="hdri_sky_015.hdr"
+        poster="images/room_poster.png"
         ar
         ar-modes="webxr scene-viewer quick-look"
         ar-placement="floor"
@@ -35,6 +39,7 @@
         ar-scale="fixed"
         style="width: 100%; height: 600px; border: 1px solid #ccc;">
 </model-viewer>
+
 
 
 
