@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="mk">
 <head>
-  <meta charset="UTF-8">
-  <title>Tile AR (Floor & Wall) – Scene Viewer за Vertical</title>
-  <!-- Вклучи ја последната верзија на model-viewer -->
+  <meta charset="UTF-8" />
+  <title>Tile AR – Под или Ѕид</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
@@ -44,13 +43,11 @@
 </head>
 <body>
 
-<h1>View 30x30 Tile in AR (Floor & Wall)</h1>
+<h1>View Tile in AR (Под & Ѕид)</h1>
 
-<!-- 1. Model‐viewer со Scene Viewer прво, WebXR последно -->
+<!-- 1. Единствен model-viewer без src/ios-src во почеток -->
 <model-viewer
         id="viewer"
-        src="models/tile3.glb"
-        ios-src="models/pattern.usdz"
         alt="Tile за под и ѕид"
         camera-controls
         auto-rotate
@@ -62,48 +59,63 @@
         poster="textures/tile2.jpg"
         ar
         ar-modes="scene-viewer quick-look webxr"
-        ar-placement="floor"
         ar-scale="auto"
-        style="width: 100%; height: 600px;">
+        style="width: 100%; height: 600px; border: 1px solid #ccc;">
 </model-viewer>
 
-<!-- 2. Копчиња за избор Floor / Wall и за стартување AR -->
+<!-- 2. Копчиња за избор -->
 <div class="button-row">
-  <button id="toFloor" class="active">Постави на под</button>
-  <button id="toWall">Постави на ѕид</button>
-  <button id="ar-button">📱 View in AR</button>
+  <button id="btnFloor" class="active">Постави на под</button>
+  <button id="btnWall">Постави на ѕид</button>
+  <button id="btnAR">📱 View in AR</button>
 </div>
 
-<!-- 3. JavaScript за динамично поставување на ar-placement и активирање AR -->
+<!-- 3. JavaScript за менување на моделот -->
 <script>
   const viewer = document.getElementById('viewer');
-  const btnFloor = document.getElementById('toFloor');
-  const btnWall = document.getElementById('toWall');
-  const btnAR = document.getElementById('ar-button');
+  const btnFloor = document.getElementById('btnFloor');
+  const btnWall = document.getElementById('btnWall');
+  const btnAR = document.getElementById('btnAR');
 
-  // Почетно: ar-placement на "floor"
-  viewer.setAttribute('ar-placement', 'floor');
+  // Иницијално: користи „tile_floor“ (horizontal)
+  setModel('floor');
   btnFloor.classList.add('active');
 
+  // Слушач за „Постави на под“
   btnFloor.addEventListener('click', () => {
-    viewer.setAttribute('ar-placement', 'floor');
+    setModel('floor');
     btnFloor.classList.add('active');
     btnWall.classList.remove('active');
   });
 
+  // Слушач за „Постави на ѕид“
   btnWall.addEventListener('click', () => {
-    viewer.setAttribute('ar-placement', 'wall');
+    setModel('wall');
     btnWall.classList.add('active');
     btnFloor.classList.remove('active');
   });
 
+  // Shortcut за „View in AR“
   btnAR.addEventListener('click', () => {
     if (viewer && typeof viewer.activateAR === 'function') {
       viewer.activateAR();
     } else {
-      alert("AR not supported or model not loaded.");
+      alert("AR не е поддржано или моделот не е вчтен.");
     }
   });
+
+  // Функција што ја менува комбинацијата src + ios-src според изборот
+  function setModel(type) {
+    if (type === 'floor') {
+      // Horizontal (под): use tile_floor
+      viewer.setAttribute('src',    'models/tile_floor.glb');
+      viewer.setAttribute('ios-src','models/tile_floor.usdz');
+    } else if (type === 'wall') {
+      // Vertical (ѕид): use tile_wall
+      viewer.setAttribute('src',    'models/tile_wall.glb');
+      viewer.setAttribute('ios-src','models/tile_wall.usdz');
+    }
+  }
 </script>
 </body>
 </html>
