@@ -1,33 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Tile Painter AR</title>
-
-  <!-- Fullscreen & button styling -->
-  <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Model Viewer (for iOS fallback) from Google CDN -->
-  <script type="module"
-          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
-  </script>
-
-  <!-- Your app’s entry point: detects platform & boots AR -->
-  <script type="module" src="js/main.js"></script>
+  <meta charset="UTF-8">
+  <title>30x30 Tile in AR</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body { text-align: center; font-family: sans-serif; margin-top: 50px; }
+    button {
+      font-size: 18px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <!--
-    ENTER AR BUTTON
-    Visible only on mobile. Hidden on desktop.
-    Tapping this invokes either WebXR (Android) or Quick Look (iOS).
-  -->
-  <button id="enter-ar-btn">Enter AR</button>
+<h1>View 30x30 Tile in AR</h1>
 
-  <!--
-    The AR content (Three.js canvas or <model-viewer>) will be injected
-    by js/main.js → either initAndroidAR() or initIosFallback().
-  -->
+<model-viewer id="viewer"
+              alt="Gray Marble Tile"
+              ar
+              ar-modes="scene-viewer quick-look"
+              camera-controls
+              auto-rotate
+              environment-image="neutral"
+              exposure="1.0">
+</model-viewer>
+
+<button id="ar-button">📱 View in AR</button>
+
+<script>
+  const viewer = document.getElementById('viewer');
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+  const isAndroid = /android/i.test(userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+  // ✅ Dynamically load correct model for platform
+  if (isIOS) {
+    viewer.setAttribute("ios-src", "pattern.usdz");
+    viewer.setAttribute("src", "tile3.glb"); // fallback
+  } else if (isAndroid) {
+    viewer.setAttribute("src", "tile3.glb");
+  }
+
+  // ✅ Ensure AR is triggered on click
+  document.getElementById('ar-button').onclick = () => {
+    if (viewer && typeof viewer.activateAR === 'function') {
+      viewer.activateAR();
+    } else {
+      alert("AR not supported or model not loaded.");
+    }
+  };
+</script>
 </body>
 </html>
