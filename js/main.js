@@ -5,7 +5,6 @@ async function boot() {
   const btn = document.getElementById('enter-ar-btn');
 
   // 1) Check for WebXR AR support
-  //    (only Chrome on ARCore-capable Android will return true)
   let hasWebXR = false;
   if (navigator.xr && navigator.xr.isSessionSupported) {
     try {
@@ -17,7 +16,6 @@ async function boot() {
 
   // 2) Show the button & wire up the correct handler
   if (hasWebXR) {
-    // Android + Chrome (WebXR path)
     btn.innerText = 'Enter AR';
     btn.style.display = 'block';
     btn.addEventListener('click', () => {
@@ -25,7 +23,6 @@ async function boot() {
       initAndroidAR();
     });
   } else {
-    // iOS/Safari (Quick Look path)
     btn.innerText = 'Place in AR';
     btn.style.display = 'block';
     btn.addEventListener('click', () => {

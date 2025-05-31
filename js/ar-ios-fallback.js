@@ -11,8 +11,6 @@ export default function initIosFallback() {
   mv.setAttribute('ar-modes', 'scene-viewer quick-look');
   mv.setAttribute('ar-placement', 'floor wall');
   mv.setAttribute('reveal', 'interaction');
-  //  ^ This makes the AR button appear immediately on model load.
-  //  Without `reveal="interaction"`, <model-viewer> waits for a tap on the model.
 
   // Make <model-viewer> fill the entire viewport
   mv.style.position = 'absolute';

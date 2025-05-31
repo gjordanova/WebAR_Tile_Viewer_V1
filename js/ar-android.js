@@ -17,7 +17,7 @@ export default async function initAndroidAR() {
 
   // === 2) Load the Tile Texture ===
   const loader = new THREE.TextureLoader();
-  const tileTexture = loader.load('assets/textures/tile.png', () => {
+  const tileTexture = loader.load('assets/textures/tile.jpg', () => {
     tileTexture.wrapS = tileTexture.wrapT = THREE.RepeatWrapping;
     tileTexture.repeat.set(10, 10); // adjust as needed for how many tiles per plane
   });

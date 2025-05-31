@@ -1,6 +1,4 @@
-/* Ensure body is a full-screen canvas, no scrollbars */
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
