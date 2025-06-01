@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="mk">
 <head>
-  <meta charset="UTF-8">
-  <title>Tile AR – Автоматско Floor/Wall</title>
+  <meta charset="UTF-8" />
+  <title>Tile AR – Preview и Auto Floor/Wall</title>
+  <!-- Вклучување на последната верзија на model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
@@ -10,14 +11,36 @@
       font-family: sans-serif;
       margin-top: 50px;
     }
+
+    /* Главниот model-viewer (AR сесија) */
     #viewer {
       width: 100%;
       max-width: 800px;
       height: 600px;
       border: 1px solid #ccc;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
     }
+
+    /* Контејнер за preview и копче */
+    .preview-container {
+      display: inline-block;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* Помалиот model-viewer за 3D preview над копчето */
+    #preview {
+      width: 200px;
+      height: 200px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* Копче за View in AR */
     #ar-button {
+      display: block;
+      margin: 0 auto;
       padding: 12px 24px;
       font-size: 18px;
       border: none;
@@ -33,9 +56,9 @@
 </head>
 <body>
 
-<h1>View Tile in AR (Auto Floor/Wall)</h1>
+<h1>View Tile in AR (со Preview и Auto Floor/Wall)</h1>
 
-<!-- Единствен model-viewer со двата модела дефинирани, но без ar-placement во почеток -->
+<!-- 1. Главниот model-viewer, кој ја отвора AR-сесијата -->
 <model-viewer
         id="viewer"
         src="models/tile_floor.glb"
@@ -52,51 +75,77 @@
         ar
         ar-modes="scene-viewer quick-look webxr"
         ar-scale="auto"
-        style="width: 100%; height: 600px;"
+        style="width: 100%; height: 600px; border: 1px solid #ccc;"
 ></model-viewer>
 
-<button id="ar-button">📱 View in AR</button>
+<!-- 2. Контејнер за куса3D preview и копче -->
+<div class="preview-container">
+  <!-- 2.1 Помалиот model-viewer за preview (без AR) -->
+  <model-viewer
+          id="preview"
+          src="models/tile_floor.glb"
+          ios-src="models/tile_floor.usdz"
+          alt="Преглед на плочка"
+          camera-controls
+          auto-rotate
+          auto-rotate-delay="2s"
+          camera-orbit="0deg 75deg 2.5m"
+          camera-target="0m 0m 0m"
+          field-of-view="45deg"
+          environment-image="textures/hdri_sky_015.hdr"
+          poster="textures/tile2.jpg"
+          ar-scale="auto"
+  ></model-viewer>
 
+  <!-- 2.2 Копче за стартување на AR-сесијата -->
+  <button id="ar-button">📱 View in AR</button>
+</div>
+
+<!-- 3. JavaScript за автоматско менување од floor во wall по 3 секунди -->
 <script>
   const viewer = document.getElementById('viewer');
+  const preview = document.getElementById('preview');
   const btnAR = document.getElementById('ar-button');
 
   let fallbackTimer = null;
-  let currentlyTrying = 'floor'; // ја бележи тековната поставка
+  let currentlyTrying = 'floor'; // бележи дали е floor или wall
 
   btnAR.addEventListener('click', () => {
-    // 1) Прво го поставуваме на "floor" (под)
+    // 1) Прво го поставуваме на "floor" (хоризонтален модел)
     setToFloor();
+    // Промена и на preview‐то во хоризонтална ориентација
+    setPreview('floor');
 
-    // 2) Го повикуваме AR
+    // 2) Го повикуваме AR на главниот viewer
     activateARSession();
 
-    // 3) Сетирај тајмер од 3 секунди: ако корисникот не успее да закочи,
-    // по 3s ќе пробаме да поставиме „wall“
+    // 3) Поставуваме тајмер од 3 секунди: ако не успее хоризонталното anchoring,
+    // по три секунди се обидуваме со vertical anchoring (ѕид)
     clearTimeout(fallbackTimer);
     fallbackTimer = setTimeout(() => {
-      // Доколку корисникот сѐ уште е во AR режим и не успеал да залепи:
-      // ќе смениме на „wall“ и ќе обновиме AR-сесијата.
+      // Доколку сè уште е во AR и не е пронајден каде да се залепи,
+      // сменуваме на „wall“ и повторно ја стартуваме AR-сесијата.
       setToWall();
+      setPreview('wall');
       activateARSession();
     }, 3000);
   });
 
   function setToFloor() {
     currentlyTrying = 'floor';
-    // Менуваме 3D фајловите за floor‐верзија
-    viewer.setAttribute('src', 'models/tile_floor.glb');
-    viewer.setAttribute('ios-src', 'models/tile_floor.usdz');
-    // Поставуваме anchoring за под
+    // Менуваме 3D‐фајловите за под/horizontal
+    viewer.setAttribute('src',    'models/tile_floor.glb');
+    viewer.setAttribute('ios-src','models/tile_floor.usdz');
+    // Поставуваме anchoring на хоризонтална рамнина
     viewer.setAttribute('ar-placement', 'floor');
   }
 
   function setToWall() {
     currentlyTrying = 'wall';
-    // Менуваме 3D фајловите за wall‐верзија
-    viewer.setAttribute('src', 'models/tile_wall.glb');
-    viewer.setAttribute('ios-src', 'models/tile_wall.usdz');
-    // Поставуваме anchoring за ѕид
+    // Менуваме 3D‐фајловите за ѕид/vertical
+    viewer.setAttribute('src',    'models/tile_wall.glb');
+    viewer.setAttribute('ios-src','models/tile_wall.usdz');
+    // Поставуваме anchoring на вертикална рамнина
     viewer.setAttribute('ar-placement', 'wall');
   }
 
@@ -108,9 +157,19 @@
     }
   }
 
-  // ИСКЛУЧУВАМЕ тајмер ако корисникот ја напушти AR сесијата
+  // Функција која го менува preview‐то (минијатурниот model-viewer над копчето)
+  function setPreview(type) {
+    if (type === 'floor') {
+      preview.setAttribute('src',    'models/tile_floor.glb');
+      preview.setAttribute('ios-src','models/tile_floor.usdz');
+    } else if (type === 'wall') {
+      preview.setAttribute('src',    'models/tile_wall.glb');
+      preview.setAttribute('ios-src','models/tile_wall.usdz');
+    }
+  }
+
+  // Доколку корисникот ја напушти AR-сесијата, го бришеме тајмерот
   viewer.addEventListener('ar-status', (event) => {
-    // Кога AR се затвора (na 'disabled'), ги бришеме сите тајмери
     if (event.detail.status === 'disabled') {
       clearTimeout(fallbackTimer);
     }
