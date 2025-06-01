@@ -2,8 +2,7 @@
 <html lang="mk">
 <head>
   <meta charset="UTF-8" />
-  <title>Tile AR – Auto Floor/Wall</title>
-  <!-- Вклучување на model-viewer -->
+  <title>Tile AR – Auto Floor/Wall (Поправена вертикална логика)</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
@@ -63,40 +62,47 @@
 <!-- 2. Копче за стартување на AR-сесијата -->
 <button id="ar-button">📱 View in AR</button>
 
-<!-- 3. JavaScript за автоматско менување од floor во wall по 3 секунди -->
 <script>
   const viewer = document.getElementById('viewer');
   const btnAR = document.getElementById('ar-button');
 
   let fallbackTimer = null;
+  let triedFloor = false;
 
   btnAR.addEventListener('click', () => {
-    // Прво го поставуваме моделот за хоризонтална ориентација (под)
+    // Кога кликнеме, прво поставуваме хоризонтален модел и стартуваме AR-сесија
     setToFloor();
-
-    // Го повикуваме AR-сесијата
     activateARSession();
 
-    // Поставуваме тајмер од 3 секунди: ако не е пронајдена хоризонтална рамнина,
-    // после 3s ќе се пресмета vertical anchoring (ѕид)
+    // Сетиме тајмер од 3 секунди за обид со vertical доколку floor не се пронајде
     clearTimeout(fallbackTimer);
     fallbackTimer = setTimeout(() => {
-      setToWall();
-      activateARSession();
+      // Ако AR сѐ уште е активна (floor не е залепена) 
+      // прво ја затвораме (exitAR), па после кратко време ја рестартираме со wall
+      viewer.exitAR().finally(() => {
+        setToWall();
+        // мало одложување за да се осигура дека AR сесијата е вистински затворена
+        setTimeout(() => {
+          activateARSession();
+        }, 100);
+      });
     }, 3000);
   });
 
   function setToFloor() {
-    // Поставување на ар-хоризонтално + одговарачки модели
-    viewer.setAttribute('src',    'models/tile_floor.glb');
-    viewer.setAttribute('ios-src','models/tile_floor.usdz');
+    triedFloor = true;
+    // Менуваме 3D-фајловите за под/horizontal
+    viewer.setAttribute('src', 'models/tile_floor.glb');
+    viewer.setAttribute('ios-src', 'models/tile_floor.usdz');
+    // Поставуваме anchoring на хоризонтална рамнина
     viewer.setAttribute('ar-placement', 'floor');
   }
 
   function setToWall() {
-    // Поставување на ар-вертикално + одговарачки модели
-    viewer.setAttribute('src',    'models/tile_wall.glb');
-    viewer.setAttribute('ios-src','models/tile_wall.usdz');
+    // Менуваме 3D-фајловите за ѕид/vertical
+    viewer.setAttribute('src', 'models/tile_wall.glb');
+    viewer.setAttribute('ios-src', 'models/tile_wall.usdz');
+    // Поставуваме anchoring на вертикална рамнина
     viewer.setAttribute('ar-placement', 'wall');
   }
 
@@ -108,7 +114,8 @@
     }
   }
 
-  // Доколку корисникот ја напушти AR-сесијата, го бришеме тајмерот
+  // Ако корисникот ја напушти AR-сесијата порано (на пример, кога најде floor),
+  // го бришеме тајмерот за vertical fallback
   viewer.addEventListener('ar-status', (event) => {
     if (event.detail.status === 'disabled') {
       clearTimeout(fallbackTimer);
