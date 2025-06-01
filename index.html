@@ -44,19 +44,23 @@
         id="viewer"
         src="models/tile_floor.glb"
         ios-src="models/tile_floor.usdz"
-        alt="Tiles for walls and floors"
+        alt="Tile за под или ѕид"
         camera-controls
         auto-rotate
         auto-rotate-delay="1s"
         camera-orbit="45deg 75deg 2.5m"
         camera-target="0m 0m 0m"
         field-of-view="50deg"
-        environment-image="neutral"
+        environment-image="textures/hdri_sky_015.hdr"
+        exposure="0.5"
+        shadow-intensity="0"
+        poster="textures/tile2.jpg"
         ar
         ar-modes="scene-viewer quick-look webxr"
         ar-scale="auto"
         style="width: 100%; height: 600px;"
 ></model-viewer>
+
 
 <!-- 2. Копче за стартување на AR-сесијата -->
 <button id="ar-button">📱 View in AR</button>
